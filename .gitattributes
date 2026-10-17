@@ -1,0 +1,2 @@
+# Keep captured validation logs byte-for-byte, including terminal whitespace.
+validation/*.log -whitespace
