@@ -1,0 +1,24 @@
+warning: ignoring `registry.global-min-publish-age` without `-Zmin-publish-age`
+warning: ignoring `registry.global-min-publish-age` without `-Zmin-publish-age`
+   Compiling postgres-connector-demo v0.1.0 (/home/zed/projects/greptimedb-ospp/demo/postgres-connector)
+    Finished `test` profile [unoptimized] target(s) in 1.28s
+────────────
+ Nextest run ID 70bc02ff-2b74-4a76-a750-ec69c071ed76 with nextest profile: default
+    Starting 15 tests across 3 binaries
+        PASS [   0.004s] ( 1/15) postgres-connector-demo postgres::tests::hides_raw_driver_errors
+        PASS [   0.004s] ( 2/15) postgres-connector-demo sql::tests::binds_values_and_preserves_precedence
+        PASS [   0.005s] ( 3/15) postgres-connector-demo sql::tests::quotes_identifiers_and_handles_null_tests
+        PASS [   0.006s] ( 4/15) postgres-connector-demo sql::tests::rejects_unproven_semantics_and_partial_or
+        PASS [   0.433s] ( 5/15) postgres-connector-demo::connector dropping_blocked_scan_clears_remote_activity_and_allows_another_query
+        PASS [   0.065s] ( 6/15) postgres-connector-demo::connector explain_is_lazy_and_plan_reexecutes_after_partial_drop
+        PASS [   0.102s] ( 7/15) postgres-connector-demo::connector infers_empty_schema_and_rejects_unsupported_types_and_collisions
+        PASS [   0.082s] ( 8/15) postgres-connector-demo::connector local_join_aggregation_matches_direct_postgres_baseline
+        PASS [   0.042s] ( 9/15) postgres-connector-demo::connector maps_supported_types_nulls_and_integer_boundaries
+        PASS [   0.062s] (10/15) postgres-connector-demo::connector preserves_count_empty_projection_and_synthetic_timestamp
+        PASS [   0.045s] (11/15) postgres-connector-demo::connector pushes_projection_integer_predicate_and_bound_limit
+        PASS [   0.109s] (12/15) postgres-connector-demo::connector quotes_remote_identifiers_and_keeps_injection_strings_local
+        PASS [   0.048s] (13/15) postgres-connector-demo::connector residual_string_filter_prevents_early_limit_and_missing_rows
+        PASS [   3.112s] (14/15) postgres-connector-demo::connector server_timeout_closes_failed_scan_and_pool_recovers
+        PASS [   0.175s] (15/15) postgres-connector-demo::connector streams_ten_thousand_rows_with_bounded_batches_and_pull_backpressure
+────────────
+     Summary [   4.295s] 15 tests run: 15 passed, 0 skipped

@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_DB: connector_demo
+      POSTGRES_USER: demo_owner
+      POSTGRES_PASSWORD: demo_owner_password
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./fixtures.sql:/docker-entrypoint-initdb.d/fixtures.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U demo_owner -d connector_demo"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  postgres-data:

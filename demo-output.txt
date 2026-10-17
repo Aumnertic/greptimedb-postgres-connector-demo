@@ -1,0 +1,97 @@
+PostgreSQL connector prototype; standalone DataFusion, batch_size=2
+Schema discovered from pg_catalog (synthetic timestamp appended):
+  id: Int64, nullable=false
+  name: Utf8, nullable=false
+  level: Utf8, nullable=true
+  active: Boolean, nullable=false
+  credit: Float64, nullable=true
+  greptime_timestamp: Timestamp(Millisecond, None), nullable=false
+
+SQL> SELECT id, name, credit FROM customers WHERE id >= 3 ORDER BY id
+SortExec: expr=[id@0 ASC NULLS LAST], preserve_partitioning=[false]
+  CooperativeExec
+    PgScanExec: sql=SELECT "id", "name", "credit" FROM "connector_demo"."customers" WHERE ("id" >= $1), bind_count=1
+
++----+----------+--------+
+| id | name     | credit |
++----+----------+--------+
+| 3  | Carol    |        |
+| 4  | Dave     | 40.0   |
+| 5  | Eve      | 50.0   |
+| 6  | O'Reilly | 60.0   |
++----+----------+--------+
+Output: 4 rows; connector: 4 rows in 2 batches
+Remote SQL: SELECT "id", "name", "credit" FROM "connector_demo"."customers" WHERE ("id" >= $1) [bound parameters: 1]
+
+SQL> SELECT id, name FROM customers WHERE id >= 2 LIMIT 2
+GlobalLimitExec: skip=0, fetch=2
+  CooperativeExec
+    PgScanExec: sql=SELECT "id", "name" FROM "connector_demo"."customers" WHERE ("id" >= $1) LIMIT $2, bind_count=2
+
++----+-------+
+| id | name  |
++----+-------+
+| 2  | Bob   |
+| 3  | Carol |
++----+-------+
+Output: 2 rows; connector: 2 rows in 1 batches
+Remote SQL: SELECT "id", "name" FROM "connector_demo"."customers" WHERE ("id" >= $1) LIMIT $2 [bound parameters: 2]
+
+SQL> SELECT id, name FROM customers WHERE level = 'gold' LIMIT 2
+FilterExec: level@2 = gold, projection=[id@0, name@1], fetch=2
+  CooperativeExec
+    PgScanExec: sql=SELECT "id", "name", "level" FROM "connector_demo"."customers", bind_count=0
+
++----+-------+
+| id | name  |
++----+-------+
+| 3  | Carol |
+| 5  | Eve   |
++----+-------+
+Output: 2 rows; connector: 6 rows in 3 batches
+Remote SQL: SELECT "id", "name", "level" FROM "connector_demo"."customers" [bound parameters: 0]
+
+SQL> SELECT c.level, COUNT(*) AS requests, AVG(m.latency) AS avg_latency FROM metrics m JOIN customers c ON m.customer_id = c.id WHERE c.id >= 2 AND c.active = true GROUP BY c.level ORDER BY c.level
+ProjectionExec: expr=[level@0 as level, count(Int64(1))@1 as requests, avg(m.latency)@2 as avg_latency]
+  SortExec: expr=[level@0 ASC NULLS LAST], preserve_partitioning=[false]
+    AggregateExec: mode=Single, gby=[level@1 as level], aggr=[count(Int64(1)), avg(m.latency)]
+      HashJoinExec: mode=CollectLeft, join_type=Inner, on=[(customer_id@0, id@0)], projection=[latency@1, level@3]
+        FilterExec: customer_id@0 >= 2
+          DataSourceExec: partitions=1, partition_sizes=[1]
+        CooperativeExec
+          PgScanExec: sql=SELECT "id", "level" FROM "connector_demo"."customers" WHERE ("id" >= $1) AND "active", bind_count=1
+
++--------+----------+-------------+
+| level  | requests | avg_latency |
++--------+----------+-------------+
+| gold   | 3        | 200.0       |
+| silver | 1        | 20.0        |
++--------+----------+-------------+
+Output: 2 rows; connector: 3 rows in 2 batches
+Remote SQL: SELECT "id", "level" FROM "connector_demo"."customers" WHERE ("id" >= $1) AND "active" [bound parameters: 1]
+
+SQL> SELECT COUNT(*) AS total FROM customers
+ProjectionExec: expr=[count(Int64(1))@0 as total]
+  AggregateExec: mode=Single, gby=[], aggr=[count(Int64(1))]
+    CooperativeExec
+      PgScanExec: sql=SELECT 1 FROM "connector_demo"."customers", bind_count=0
+
++-------+
+| total |
++-------+
+| 6     |
++-------+
+Output: 1 rows; connector: 6 rows in 3 batches
+Remote SQL: SELECT 1 FROM "connector_demo"."customers" [bound parameters: 0]
+
+SQL> SELECT id, greptime_timestamp FROM customers WHERE id = 3
+CooperativeExec
+  PgScanExec: sql=SELECT "id" FROM "connector_demo"."customers" WHERE ("id" = $1), bind_count=1
+
++----+---------------------+
+| id | greptime_timestamp  |
++----+---------------------+
+| 3  | 1970-01-01T00:00:00 |
++----+---------------------+
+Output: 1 rows; connector: 1 rows in 1 batches
+Remote SQL: SELECT "id" FROM "connector_demo"."customers" WHERE ("id" = $1) [bound parameters: 1]

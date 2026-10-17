@@ -1,0 +1,25 @@
+[package]
+name = "postgres-connector-demo"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+publish = false
+
+# This prototype is independent of the GreptimeDB workspace. DataFusion uses
+# exactly the same fork/revision as the repository, without building GreptimeDB.
+[workspace]
+resolver = "2"
+
+[dependencies]
+async-stream = "0.3.6"
+async-trait = "0.1"
+datafusion = { git = "https://github.com/GreptimeTeam/datafusion.git", rev = "e3221b8f74b15c7192621576e5d1e354a6cf097a", default-features = false, features = ["sql"] }
+futures = "0.3"
+sqlx = { version = "=0.8.6", default-features = false, features = ["postgres", "runtime-tokio", "tls-rustls-ring"] }
+tokio = { version = "1.47", features = ["macros", "rt-multi-thread", "time"] }
+
+[profile.dev]
+debug = 0
+
+[profile.test]
+debug = 0

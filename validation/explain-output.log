@@ -1,0 +1,23 @@
+PostgreSQL connector prototype; standalone DataFusion, batch_size=2
+Schema discovered from pg_catalog (synthetic timestamp appended):
+  id: Int64, nullable=false
+  name: Utf8, nullable=false
+  level: Utf8, nullable=true
+  active: Boolean, nullable=false
+  credit: Float64, nullable=true
+  greptime_timestamp: Timestamp(Millisecond, None), nullable=false
+
+SQL> EXPLAIN SELECT name FROM customers WHERE id >= 2 LIMIT 2
+ExplainExec
+
++---------------+---------------------------------------------------------------------------------------------------------------+
+| plan_type     | plan                                                                                                          |
++---------------+---------------------------------------------------------------------------------------------------------------+
+| logical_plan  | Limit: skip=0, fetch=2                                                                                        |
+|               |   TableScan: customers projection=[name], full_filters=[customers.id >= Int64(2)], fetch=2                    |
+| physical_plan | GlobalLimitExec: skip=0, fetch=2                                                                              |
+|               |   CooperativeExec                                                                                             |
+|               |     PgScanExec: sql=SELECT "name" FROM "connector_demo"."customers" WHERE ("id" >= $1) LIMIT $2, bind_count=2 |
+|               |                                                                                                               |
++---------------+---------------------------------------------------------------------------------------------------------------+
+Output: 2 rows; connector: 0 rows in 0 batches

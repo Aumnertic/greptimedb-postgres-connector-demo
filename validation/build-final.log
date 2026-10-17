@@ -1,0 +1,2 @@
+warning: ignoring `registry.global-min-publish-age` without `-Zmin-publish-age`
+    Finished `dev` profile [unoptimized] target(s) in 0.18s
